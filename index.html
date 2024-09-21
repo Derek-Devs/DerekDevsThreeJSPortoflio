@@ -3,32 +3,35 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Derek Shirley Portfolio</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: Arial, Helvetica, sans-serif
-        }
-
-
-        canvas {
-            display: block;
-        }
-
-        .label {
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-            color: white;
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-    </style>
+    <title>Derek Shirley's Portfolio</title>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
+    <!-- Header -->
+    <header>
+        <h1>Derek Shirley Portfolio</h1>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </header>
+
+    <!-- Navigation Menu -->
+    <nav class="nav-menu" id="nav-menu">
+        <a href="#about">About Me</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2023 My Portfolio. All rights reserved.
+    </footer>
+
+    <!-- Include three.js library and your main.js script -->
     <script type="module" src="./main.js"></script>
 </body>
 

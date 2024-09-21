@@ -33,15 +33,15 @@ scene.add(directionalLight);
 
 // Projects Array
 const projects = [
-  { title: 'Project 1', color: 0xff0000, link: '#' },
-  { title: 'Project 2', color: 0x00ff00, link: '#' },
-  { title: 'Project 3', color: 0x0000ff, link: '#' },
+  { title: 'Project 1', color: 0xff5000, link: '#' },
+  { title: 'Project 2', color: 0x00af00, link: '#' },
+  { title: 'Project 3', color: 0x0100af, link: '#' },
   { title: 'Project 4', color: 0xffff00, link: '#' },
   { title: 'Project 5', color: 0xff00ff, link: '#' },
   { title: 'Project 6', color: 0x00ffff, link: '#' },
   { title: 'Project 7', color: 0xffffff, link: '#' },
   { title: 'Project 8', color: 0x888888, link: '#' },
-  { title: 'Project 9', color: 0x000000, link: '#' }
+  { title: 'Project 9', color: 0x003854, link: '#' }
 ];
 
 let projectMeshes = [];
@@ -207,3 +207,17 @@ function animate() {
 }
 
 animate();
+// Hamburger Menu Interactivity
+const hamburger = document.getElementById('hamburger');
+const navMenu = document.getElementById('nav-menu');
+let menuOpen = false;
+
+hamburger.addEventListener('click', () => {
+  if (!menuOpen) {
+    navMenu.style.right = '0';
+    menuOpen = true;
+  } else {
+    navMenu.style.right = '-250px';
+    menuOpen = false;
+  }
+});
