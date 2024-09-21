@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import gsap from 'gsap';
 
 // Scene and Camera
 const scene = new THREE.Scene();
@@ -128,6 +129,16 @@ function onPointerDown(event) {
   }
 }
 
+function animateBlock(block, hover) {
+  if (hover) {
+    // Rotate the block to 180 degrees on Y-axis
+    gsap.to(block.rotation, { y: Math.PI, duration: 0.6, ease: "power2.out" });
+  } else {
+    // Reset the rotation
+    gsap.to(block.rotation, { y: 0, duration: 0.6, ease: "power2.out" });
+  }
+}
+
 function onPointerMove(event) {
   event.preventDefault();
 
@@ -149,14 +160,16 @@ function onPointerMove(event) {
   if (intersects.length > 0) {
     if (hoveredObject !== intersects[0].object) {
       if (hoveredObject) {
-        hoveredObject.userData.isHovered = false;
+        // Reset previous hovered object
+        animateBlock(hoveredObject, false);
       }
       hoveredObject = intersects[0].object;
-      hoveredObject.userData.isHovered = true;
+      animateBlock(hoveredObject, true);
     }
   } else {
     if (hoveredObject) {
-      hoveredObject.userData.isHovered = false;
+      // Reset previous hovered object
+      animateBlock(hoveredObject, false);
       hoveredObject = null;
     }
   }
@@ -186,12 +199,7 @@ function animate() {
     let hoverHeight = 0.2;
     let speed = 0.5;
     let baseY = cube.userData.initialPosition.y + Math.sin(elapsedTime * speed + index) * hoverHeight;
-
-    if (cube.userData.isHovered) {
-      cube.position.y = baseY + 0.5;
-    } else {
-      cube.position.y = baseY;
-    }
+    cube.position.y = baseY;
   });
 
   renderer.render(scene, camera);
