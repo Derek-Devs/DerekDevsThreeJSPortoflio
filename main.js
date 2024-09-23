@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import gsap from 'gsap';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Scene and Camera
 const scene = new THREE.Scene();
@@ -31,42 +32,105 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(0, 10, 10);
 scene.add(directionalLight);
 
+// GLTFLoader
+const loader = new GLTFLoader();
+
 // Projects Array
 const projects = [
-  { title: 'Project 1', color: 0xff5000, link: '#' },
-  { title: 'Project 2', color: 0x00af00, link: '#' },
-  { title: 'Project 3', color: 0x0100af, link: '#' },
-  { title: 'Project 4', color: 0xffff00, link: '#' },
-  { title: 'Project 5', color: 0xff00ff, link: '#' },
-  { title: 'Project 6', color: 0x00ffff, link: '#' },
-  { title: 'Project 7', color: 0xffffff, link: '#' },
-  { title: 'Project 8', color: 0x888888, link: '#' },
-  { title: 'Project 9', color: 0x003854, link: '#' }
+  { title: 'Project 1', iconPath: '/icons/machine_learning.glb', link: 'machinelearning' },
+  { title: 'Project 2', iconPath: '/icons/economymachinelearning.glb', link: '#' },
+  { title: 'Project 3', iconPath: '/icons/hourglass.glb', link: '#' },
+  { title: 'Project 4', iconPath: '/icons/tableu.glb', link: '#' },
+  { title: 'Project 5', iconPath: '/icons/hourglass.glb', link: '#' },
+  { title: 'Project 6', iconPath: '/icons/aboutme.glb', link: '#' },
+  { title: 'Project 7', iconPath: '/icons/gamedev.glb', link: '#' },
+  { title: 'Project 8', iconPath: '/icons/gamedev.glb', link: '#' },
+  { title: 'Project 9', iconPath: '/icons/gamedev.glb', link: '#' }
 ];
 
 let projectMeshes = [];
 
 function loadProjects() {
+  let modelsLoaded = 0;
+
   projects.forEach((project, index) => {
-    const geometry = new THREE.BoxGeometry(3, 3, 3);
-    const material = new THREE.MeshStandardMaterial({ color: project.color });
-    const cube = new THREE.Mesh(geometry, material);
+    if (project.iconPath) {
+      // Load the icon
+      loader.load(
+        project.iconPath,
+        (gltf) => {
+          const icon = gltf.scene;
 
-    // Store initial position
-    cube.userData.initialPosition = cube.position.clone();
-    cube.userData.link = project.link;
+          // Compute the bounding box of the model
+          const box = new THREE.Box3().setFromObject(icon);
+          const size = new THREE.Vector3();
+          box.getSize(size);
 
-    // Label
-    const labelDiv = document.createElement('div');
-    labelDiv.className = 'label';
-    labelDiv.textContent = project.title;
+          // Desired size for the icons
+          const desiredSize = 3; // Adjust this value as needed
 
-    const label = new CSS2DObject(labelDiv);
-    label.position.set(0, -2.2, 0);
-    cube.add(label);
+          // Calculate the maximum dimension among x, y, and z
+          const maxDimension = Math.max(size.x, size.y, size.z);
 
-    scene.add(cube);
-    projectMeshes.push(cube);
+          // Calculate the scaling factor
+          const scaleFactor = desiredSize / maxDimension;
+
+          // Apply the scaling uniformly
+          icon.scale.multiplyScalar(scaleFactor);
+
+          // Center the icon
+          box.setFromObject(icon);
+          const center = box.getCenter(new THREE.Vector3());
+          icon.position.sub(center); // Center the icon at the origin
+
+          // Create a group to hold the icon and label
+          const projectGroup = new THREE.Object3D();
+          projectGroup.add(icon);
+
+          // Add label
+          const labelDiv = document.createElement('div');
+          labelDiv.className = 'label';
+          labelDiv.textContent = project.title;
+
+          const label = new CSS2DObject(labelDiv);
+          label.position.set(0, -desiredSize / 2 - 0.5, 0);
+          projectGroup.add(label);
+
+          // Store project data
+          projectGroup.userData = {
+            link: project.link,
+            index: index, // Store index for reference
+            isRotating: false, // Flag to track rotation on hover
+          };
+
+          // Add to scene and projectMeshes array
+          scene.add(projectGroup);
+          projectMeshes.push(projectGroup);
+
+          // Increment modelsLoaded and check if all models are loaded
+          modelsLoaded++;
+          if (modelsLoaded === projects.length) {
+            layoutProjects();
+          }
+        },
+        undefined,
+        (error) => {
+          console.error('An error occurred while loading the icon:', error);
+
+          // Increment modelsLoaded and check if all models are loaded
+          modelsLoaded++;
+          if (modelsLoaded === projects.length) {
+            layoutProjects();
+          }
+        }
+      );
+    } else {
+      console.error(`Project ${project.title} has an invalid iconPath.`);
+      modelsLoaded++;
+      if (modelsLoaded === projects.length) {
+        layoutProjects();
+      }
+    }
   });
 }
 
@@ -81,21 +145,21 @@ function layoutProjects() {
     cols = 2;
   }
 
-  let spacing = 5;
+  let spacing = 6; // Adjust spacing as needed
 
-  projectMeshes.forEach((cube, index) => {
+  projectMeshes.forEach((projectGroup, index) => {
     const x = (index % cols) * spacing - ((cols - 1) * spacing) / 2;
     const y = -Math.floor(index / cols) * spacing + 5;
 
-    cube.position.x = x;
-    cube.position.y = y;
-    cube.userData.initialPosition.x = x;
-    cube.userData.initialPosition.y = y;
+    // Set the position
+    projectGroup.position.set(x, y, 0);
+
+    // Store initial position for animations
+    projectGroup.userData.initialPosition = new THREE.Vector3(x, y, 0);
   });
 }
 
 loadProjects();
-layoutProjects();
 
 // Interactivity
 const raycaster = new THREE.Raycaster();
@@ -118,24 +182,29 @@ function onPointerDown(event) {
   mouse.y = - (clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(projectMeshes);
+  const intersects = raycaster.intersectObjects(projectMeshes, true);
 
   if (intersects.length > 0) {
-    const selectedObject = intersects[0].object;
-    const projectLink = selectedObject.userData.link;
-
-    // Open project link
-    window.open(projectLink, '_blank');
+    let selectedObject = intersects[0].object;
+    // Traverse up to find the projectGroup
+    while (selectedObject && !selectedObject.userData.link) {
+      selectedObject = selectedObject.parent;
+    }
+    if (selectedObject) {
+      const projectLink = selectedObject.userData.link;
+      // Open project link
+      window.open(projectLink, '_blank');
+    }
   }
 }
 
 function animateBlock(block, hover) {
   if (hover) {
-    // Rotate the block to 180 degrees on Y-axis
-    gsap.to(block.rotation, { y: Math.PI, duration: 0.6, ease: "power2.out" });
+    block.userData.isRotating = true;
   } else {
-    // Reset the rotation
-    gsap.to(block.rotation, { y: 0, duration: 0.6, ease: "power2.out" });
+    block.userData.isRotating = false;
+    // Reset rotation
+    block.rotation.set(0, 0, 0);
   }
 }
 
@@ -155,16 +224,23 @@ function onPointerMove(event) {
   mouse.y = - (clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(projectMeshes);
+  const intersects = raycaster.intersectObjects(projectMeshes, true);
 
   if (intersects.length > 0) {
-    if (hoveredObject !== intersects[0].object) {
-      if (hoveredObject) {
-        // Reset previous hovered object
-        animateBlock(hoveredObject, false);
+    let selectedObject = intersects[0].object;
+    // Traverse up to find the projectGroup
+    while (selectedObject && !selectedObject.userData.link) {
+      selectedObject = selectedObject.parent;
+    }
+    if (selectedObject) {
+      if (hoveredObject !== selectedObject) {
+        if (hoveredObject) {
+          // Reset previous hovered object
+          animateBlock(hoveredObject, false);
+        }
+        hoveredObject = selectedObject;
+        animateBlock(hoveredObject, true);
       }
-      hoveredObject = intersects[0].object;
-      animateBlock(hoveredObject, true);
     }
   } else {
     if (hoveredObject) {
@@ -195,11 +271,16 @@ function animate() {
 
   let elapsedTime = clock.getElapsedTime();
 
-  projectMeshes.forEach((cube, index) => {
+  projectMeshes.forEach((projectGroup, index) => {
     let hoverHeight = 0.2;
     let speed = 0.5;
-    let baseY = cube.userData.initialPosition.y + Math.sin(elapsedTime * speed + index) * hoverHeight;
-    cube.position.y = baseY;
+    let baseY = projectGroup.userData.initialPosition.y + Math.sin(elapsedTime * speed + index) * hoverHeight;
+    projectGroup.position.y = baseY;
+
+    if (projectGroup.userData.isRotating) {
+      // Rotate the projectGroup
+      projectGroup.rotation.y += 0.05; // Adjust the rotation speed as needed
+    }
   });
 
   renderer.render(scene, camera);
@@ -207,6 +288,7 @@ function animate() {
 }
 
 animate();
+
 // Hamburger Menu Interactivity
 const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('nav-menu');
