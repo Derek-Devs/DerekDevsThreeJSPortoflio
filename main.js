@@ -37,15 +37,15 @@ const loader = new GLTFLoader();
 
 // Projects Array
 const projects = [
-  { title: 'Project 1', iconPath: '/icons/machine_learning.glb', link: 'machinelearning' },
+  { title: 'Machine Learning Projects', iconPath: '/icons/machine_learning.glb', link: 'machinelearning' },
   { title: 'Project 2', iconPath: '/icons/economymachinelearning.glb', link: '#' },
   { title: 'Project 3', iconPath: '/icons/hourglass.glb', link: '#' },
-  { title: 'Project 4', iconPath: '/icons/tableu.glb', link: '#' },
+  { title: 'Data Visualization', iconPath: '/icons/tableu.glb', link: '#' },
   { title: 'Project 5', iconPath: '/icons/hourglass.glb', link: '#' },
   { title: 'Project 6', iconPath: '/icons/aboutme.glb', link: '#' },
   { title: 'Project 7', iconPath: '/icons/gamedev.glb', link: '#' },
-  { title: 'Project 8', iconPath: '/icons/gamedev.glb', link: '#' },
-  { title: 'Project 9', iconPath: '/icons/gamedev.glb', link: '#' }
+  { title: 'About', iconPath: '/icons/gamedev.glb', link: '#' },
+  { title: 'Indie Game Development', iconPath: '/icons/gamedev.glb', link: '#' }
 ];
 
 let projectMeshes = [];
@@ -137,7 +137,7 @@ function loadProjects() {
 function layoutProjects() {
   let screenWidth = window.innerWidth;
 
-  // Determine columns
+  // Determine columns based on screen width
   let cols = 3;
   if (screenWidth < 600) {
     cols = 1;
@@ -166,20 +166,27 @@ const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let hoveredObject = null;
 
+function getPointerCoordinates(event) {
+  if (event.touches && event.touches.length > 0) {
+    return {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+  } else {
+    return {
+      x: event.clientX,
+      y: event.clientY,
+    };
+  }
+}
+
 function onPointerDown(event) {
   event.preventDefault();
 
-  let clientX, clientY;
-  if (event.touches) {
-    clientX = event.touches[0].clientX;
-    clientY = event.touches[0].clientY;
-  } else {
-    clientX = event.clientX;
-    clientY = event.clientY;
-  }
+  const { x, y } = getPointerCoordinates(event);
 
-  mouse.x = (clientX / window.innerWidth) * 2 - 1;
-  mouse.y = - (clientY / window.innerHeight) * 2 + 1;
+  mouse.x = (x / window.innerWidth) * 2 - 1;
+  mouse.y = - (y / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(projectMeshes, true);
@@ -211,17 +218,10 @@ function animateBlock(block, hover) {
 function onPointerMove(event) {
   event.preventDefault();
 
-  let clientX, clientY;
-  if (event.touches) {
-    clientX = event.touches[0].clientX;
-    clientY = event.touches[0].clientY;
-  } else {
-    clientX = event.clientX;
-    clientY = event.clientY;
-  }
+  const { x, y } = getPointerCoordinates(event);
 
-  mouse.x = (clientX / window.innerWidth) * 2 - 1;
-  mouse.y = - (clientY / window.innerHeight) * 2 + 1;
+  mouse.x = (x / window.innerWidth) * 2 - 1;
+  mouse.y = - (y / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(projectMeshes, true);
@@ -253,7 +253,12 @@ function onPointerMove(event) {
 
 window.addEventListener('pointerdown', onPointerDown, false);
 window.addEventListener('pointermove', onPointerMove, false);
-window.addEventListener('resize', () => {
+
+// Prevent default touch actions on the canvas
+renderer.domElement.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
+renderer.domElement.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
+
+function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 
@@ -261,7 +266,9 @@ window.addEventListener('resize', () => {
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
 
   layoutProjects();
-});
+}
+
+window.addEventListener('resize', onWindowResize, false);
 
 // Animation Loop
 let clock = new THREE.Clock();
