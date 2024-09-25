@@ -39,8 +39,8 @@ const loader = new GLTFLoader();
 const projects = [
   { title: 'Machine Learning', iconPath: '/icons/machine_learning.glb', link: 'machinelearning' },
   { title: 'Data Visualization', iconPath: '/icons/tableu.glb', link: '#' },
-  { title: 'SQL Examples', iconPath: '/icons/sql.glb', link: '#' },
-  { title: 'DAX Examples', iconPath: '/icons/dax.glb', link: '#' },
+  { title: 'SQL Examples', iconPath: '/icons/hourglass.glb', link: '#' },
+  { title: 'DAX Examples', iconPath: '/icons/tableu.glb', link: '#' },
   { title: 'stuff', iconPath: '/icons/hourglass.glb', link: '#' },
   { title: 'Project 6', iconPath: '/icons/aboutme.glb', link: '#' },
   { title: 'Web Development', iconPath: '/icons/gamedev.glb', link: '#' },
@@ -49,6 +49,54 @@ const projects = [
 ];
 
 let projectMeshes = [];
+
+// **Add the stars**
+let starGroup;
+
+function createStars() {
+  starGroup = new THREE.Group();
+  const starGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+  const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+  const starCount = 500; // Adjust the number of stars as needed
+
+  for (let i = 0; i < starCount; i++) {
+    const star = new THREE.Mesh(starGeometry, starMaterial);
+
+    // Random position within a certain range
+    star.position.x = THREE.MathUtils.randFloatSpread(200); // Random between -100 and 100
+    star.position.y = THREE.MathUtils.randFloatSpread(200);
+    star.position.z = THREE.MathUtils.randFloatSpread(200) - 100; // Place them behind the projects
+
+    // Initially position stars off-screen for the slide-in effect
+    star.position.y += 100; // Adjust as needed
+
+    starGroup.add(star);
+  }
+
+  scene.add(starGroup);
+
+  // Animate stars sliding into view
+  starGroup.children.forEach((star) => {
+    gsap.to(star.position, {
+      y: star.position.y - 100, // Move back to original position
+      duration: 2,
+      ease: 'power2.out',
+      delay: Math.random() * 2 // Random delay for each star
+    });
+  });
+}
+
+let mouse = new THREE.Vector2();
+let target = new THREE.Vector2();
+let windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
+
+function onMouseMove(event) {
+  mouse.x = (event.clientX - windowHalf.x) / windowHalf.x;
+  mouse.y = (event.clientY - windowHalf.y) / windowHalf.y;
+}
+
+window.addEventListener('mousemove', onMouseMove, false);
 
 function loadProjects() {
   let modelsLoaded = 0;
@@ -169,11 +217,11 @@ function layoutProjects() {
   });
 }
 
+createStars();
 loadProjects();
 
 // Interactivity
 const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
 let hoveredObject = null;
 
 function getPointerCoordinates(event) {
@@ -195,10 +243,11 @@ function onPointerDown(event) {
 
   const { x, y } = getPointerCoordinates(event);
 
-  mouse.x = (x / window.innerWidth) * 2 - 1;
-  mouse.y = - (y / window.innerHeight) * 2 + 1;
+  const mousePos = new THREE.Vector2();
+  mousePos.x = (x / window.innerWidth) * 2 - 1;
+  mousePos.y = - (y / window.innerHeight) * 2 + 1;
 
-  raycaster.setFromCamera(mouse, camera);
+  raycaster.setFromCamera(mousePos, camera);
   const intersects = raycaster.intersectObjects(projectMeshes, true);
 
   if (intersects.length > 0) {
@@ -230,10 +279,11 @@ function onPointerMove(event) {
 
   const { x, y } = getPointerCoordinates(event);
 
-  mouse.x = (x / window.innerWidth) * 2 - 1;
-  mouse.y = - (y / window.innerHeight) * 2 + 1;
+  const mousePos = new THREE.Vector2();
+  mousePos.x = (x / window.innerWidth) * 2 - 1;
+  mousePos.y = - (y / window.innerHeight) * 2 + 1;
 
-  raycaster.setFromCamera(mouse, camera);
+  raycaster.setFromCamera(mousePos, camera);
   const intersects = raycaster.intersectObjects(projectMeshes, true);
 
   if (intersects.length > 0) {
@@ -276,6 +326,8 @@ function onWindowResize() {
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
 
   layoutProjects();
+
+  windowHalf.set(window.innerWidth / 2, window.innerHeight / 2);
 }
 
 window.addEventListener('resize', onWindowResize, false);
@@ -299,6 +351,21 @@ function animate() {
       projectGroup.rotation.y += 0.05; // Adjust the rotation speed as needed
     }
   });
+
+  // Mouse parallax effect for stars
+  target.x = (1 - mouse.x) * 0.02;
+  target.y = (1 - mouse.y) * 0.02;
+
+  if (starGroup) {
+    starGroup.rotation.y += 0.0005; // Optional slow rotation
+
+    gsap.to(starGroup.rotation, {
+      x: target.y,
+      y: target.x,
+      duration: 0.5,
+      ease: 'power1.out'
+    });
+  }
 
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
