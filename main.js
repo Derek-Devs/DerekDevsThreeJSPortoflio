@@ -39,11 +39,11 @@ const loader = new GLTFLoader();
 const projects = [
   { title: 'Machine Learning', iconPath: '/icons/machine_learning.glb', link: 'machinelearning' },
   { title: 'Data Visualization', iconPath: '/icons/tableu.glb', link: '#' },
-  { title: 'SQL Examples', iconPath: '/icons/hourglass.glb', link: '#' },
-  { title: 'DAX Examples', iconPath: '/icons/tableu.glb', link: '#' },
+  { title: 'SQL Examples', iconPath: '/icons/sql.glb', link: '#' },
+  { title: 'DAX Examples', iconPath: '/icons/dax.glb', link: '#' },
   { title: 'stuff', iconPath: '/icons/hourglass.glb', link: '#' },
   { title: 'Project 6', iconPath: '/icons/aboutme.glb', link: '#' },
-  { title: 'Web Development', iconPath: '/icons/gamedev.glb', link: '#' },
+  { title: 'Web Development', iconPath: '/icons/webdev.glb', link: '#' },
   { title: 'About Me', iconPath: '/icons/aboutme.glb', link: '#' },
   { title: 'Indie Game Development', iconPath: '/icons/gamedev.glb', link: '#' }
 ];
@@ -147,7 +147,7 @@ function loadProjects() {
           labelDiv.textContent = project.title;
 
           const label = new CSS2DObject(labelDiv);
-          label.position.set(0, minY - 0.2, 0); // Adjust the offset as needed
+          label.position.set(0, minY - 2, 0); // Adjust the offset as needed
           projectGroup.add(label);
 
           // Store project data
