@@ -37,14 +37,14 @@ const loader = new GLTFLoader();
 
 // Projects Array
 const projects = [
-  { title: 'Machine Learning Projects', iconPath: '/icons/machine_learning.glb', link: 'machinelearning' },
-  { title: 'Project 2', iconPath: '/icons/economymachinelearning.glb', link: '#' },
-  { title: 'Project 3', iconPath: '/icons/hourglass.glb', link: '#' },
+  { title: 'Machine Learning', iconPath: '/icons/machine_learning.glb', link: 'machinelearning' },
   { title: 'Data Visualization', iconPath: '/icons/tableu.glb', link: '#' },
-  { title: 'Project 5', iconPath: '/icons/hourglass.glb', link: '#' },
+  { title: 'SQL Examples', iconPath: '/icons/sql.glb', link: '#' },
+  { title: 'DAX Examples', iconPath: '/icons/dax.glb', link: '#' },
+  { title: 'stuff', iconPath: '/icons/hourglass.glb', link: '#' },
   { title: 'Project 6', iconPath: '/icons/aboutme.glb', link: '#' },
-  { title: 'Project 7', iconPath: '/icons/gamedev.glb', link: '#' },
-  { title: 'About', iconPath: '/icons/gamedev.glb', link: '#' },
+  { title: 'Web Development', iconPath: '/icons/gamedev.glb', link: '#' },
+  { title: 'About Me', iconPath: '/icons/aboutme.glb', link: '#' },
   { title: 'Indie Game Development', iconPath: '/icons/gamedev.glb', link: '#' }
 ];
 
@@ -83,6 +83,12 @@ function loadProjects() {
           const center = box.getCenter(new THREE.Vector3());
           icon.position.sub(center); // Center the icon at the origin
 
+          // Recompute bounding box after centering
+          box.setFromObject(icon);
+
+          // Get minY of the icon
+          const minY = box.min.y;
+
           // Create a group to hold the icon and label
           const projectGroup = new THREE.Object3D();
           projectGroup.add(icon);
@@ -93,7 +99,7 @@ function loadProjects() {
           labelDiv.textContent = project.title;
 
           const label = new CSS2DObject(labelDiv);
-          label.position.set(0, -desiredSize / 2 - 0.5, 0);
+          label.position.set(0, minY - 0.2, 0); // Adjust the offset as needed
           projectGroup.add(label);
 
           // Store project data
@@ -147,9 +153,13 @@ function layoutProjects() {
 
   let spacing = 6; // Adjust spacing as needed
 
+  const totalProjects = projectMeshes.length;
+  const rows = Math.ceil(totalProjects / cols);
+  const totalHeight = (rows - 1) * spacing;
+
   projectMeshes.forEach((projectGroup, index) => {
     const x = (index % cols) * spacing - ((cols - 1) * spacing) / 2;
-    const y = -Math.floor(index / cols) * spacing + 5;
+    const y = -Math.floor(index / cols) * spacing + totalHeight / 2;
 
     // Set the position
     projectGroup.position.set(x, y, 0);
