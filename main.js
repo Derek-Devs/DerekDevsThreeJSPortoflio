@@ -41,9 +41,9 @@ const projects = [
   { title: 'Data Visualization', iconPath: '/icons/tableu.glb', link: '#' },
   { title: 'SQL Examples', iconPath: '/icons/sql.glb', link: '#' },
   { title: 'DAX Examples', iconPath: '/icons/dax.glb', link: '#' },
-  { title: 'stuff', iconPath: '/icons/hourglass.glb', link: '#' },
-  { title: 'Project 6', iconPath: '/icons/aboutme.glb', link: '#' },
+  { title: 'Python Projects', iconPath: '/icons/webscraping.glb', link: '#' },
   { title: 'Web Development', iconPath: '/icons/webdev.glb', link: '#' },
+  { title: 'Personal Projects', iconPath: '/icons/alteryx.glb', link: '#' },
   { title: 'About Me', iconPath: '/icons/aboutme.glb', link: '#' },
   { title: 'Indie Game Development', iconPath: '/icons/gamedev.glb', link: '#' }
 ];
