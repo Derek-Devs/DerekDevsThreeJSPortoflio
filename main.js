@@ -22,6 +22,7 @@ labelRenderer.setSize(window.innerWidth, window.innerHeight);
 labelRenderer.domElement.style.position = 'absolute';
 labelRenderer.domElement.style.top = '0';
 labelRenderer.domElement.style.pointerEvents = 'none';
+labelRenderer.domElement.style.zIndex = '5'; // Header has z-index: 10
 document.body.appendChild(labelRenderer.domElement);
 
 // Lights
@@ -58,7 +59,7 @@ function createStars() {
   const starGeometry = new THREE.SphereGeometry(0.1, 8, 8);
   const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-  const starCount = 500; // Adjust the number of stars as needed
+  const starCount = 1500; // Adjust the number of stars as needed
 
   for (let i = 0; i < starCount; i++) {
     const star = new THREE.Mesh(starGeometry, starMaterial);
@@ -69,7 +70,7 @@ function createStars() {
     star.position.z = THREE.MathUtils.randFloatSpread(200) - 100; // Place them behind the projects
 
     // Initially position stars off-screen for the slide-in effect
-    star.position.y += 100; // Adjust as needed
+    star.position.y += 300; // Adjust as needed
 
     starGroup.add(star);
   }
@@ -79,7 +80,7 @@ function createStars() {
   // Animate stars sliding into view
   starGroup.children.forEach((star) => {
     gsap.to(star.position, {
-      y: star.position.y - 100, // Move back to original position
+      y: star.position.y - 300, // Move back to original position
       duration: 2,
       ease: 'power2.out',
       delay: Math.random() * 2 // Random delay for each star
@@ -193,7 +194,7 @@ function layoutProjects() {
 
   // Determine columns based on screen width
   let cols = 3;
-  if (screenWidth < 600) {
+  if (screenWidth < 400) {
     cols = 1;
   } else if (screenWidth < 900) {
     cols = 2;
@@ -207,7 +208,7 @@ function layoutProjects() {
 
   projectMeshes.forEach((projectGroup, index) => {
     const x = (index % cols) * spacing - ((cols - 1) * spacing) / 2;
-    const y = -Math.floor(index / cols) * spacing + totalHeight / 2;
+    const y = -Math.floor(index / cols) * spacing + totalHeight / 1.6;
 
     // Set the position
     projectGroup.position.set(x, y, 0);
@@ -215,6 +216,26 @@ function layoutProjects() {
     // Store initial position for animations
     projectGroup.userData.initialPosition = new THREE.Vector3(x, y, 0);
   });
+  adjustCamera(totalHeight);
+}
+function adjustCamera(contentHeight) {
+  const aspect = window.innerWidth / window.innerHeight;
+  const fov = camera.fov * (Math.PI / 180); // Convert to radians
+
+  // Calculate the distance needed from the camera to fit the contentHeight
+  const requiredDistance = (contentHeight / 2) / Math.tan(fov / 2);
+
+  // Adjust for some padding (optional)
+  const padding = 2; // Adjust as needed
+  const distance = requiredDistance + padding;
+
+  // Set the camera position
+  camera.position.set(0, 0, distance);
+
+  // Optionally, adjust the camera's near and far planes
+  camera.near = distance / 10;
+  camera.far = distance + 1000;
+  camera.updateProjectionMatrix();
 }
 
 createStars();
@@ -325,10 +346,11 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
 
-  layoutProjects();
+  layoutProjects(); // This will call adjustCamera internally
 
   windowHalf.set(window.innerWidth / 2, window.innerHeight / 2);
 }
+
 
 window.addEventListener('resize', onWindowResize, false);
 
