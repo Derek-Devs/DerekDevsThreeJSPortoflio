@@ -38,11 +38,11 @@ const loader = new GLTFLoader();
 
 // Projects Array
 const projects = [
-  { title: 'Machine Learning', iconPath: '/icons/machine_learning.glb', link: 'machinelearning' },
+  { title: 'Machine Learning Projects', iconPath: '/icons/machine_learning.glb', link: 'machinelearning' },
   { title: 'Data Visualization', iconPath: '/icons/tableu.glb', link: '#' },
-  { title: 'SQL Examples', iconPath: '/icons/sql.glb', link: '#' },
+  { title: 'SQL Examples', iconPath: '/icons/sql.glb', link: 'https://github.com/Derek-Devs/SQL-Examples' },
   { title: 'DAX Examples', iconPath: '/icons/dax.glb', link: '#' },
-  { title: 'Python Projects', iconPath: '/icons/webscraping.glb', link: '#' },
+  { title: 'Python Projects', iconPath: '/icons/webscraping.glb', link: 'https://github.com/Derek-Devs/Python-Examples' },
   { title: 'Web Development', iconPath: '/icons/webdev.glb', link: '#' },
   { title: 'Personal Projects', iconPath: '/icons/alteryx.glb', link: '#' },
   { title: 'About Me', iconPath: '/icons/aboutme.glb', link: '#' },
@@ -148,7 +148,7 @@ function loadProjects() {
           labelDiv.textContent = project.title;
 
           const label = new CSS2DObject(labelDiv);
-          label.position.set(0, minY - 2, 0); // Adjust the offset as needed
+          label.position.set(0, minY - 2.5, 0); // Adjust the offset as needed
           projectGroup.add(label);
 
           // Store project data
@@ -226,7 +226,7 @@ function adjustCamera(contentHeight) {
   const requiredDistance = (contentHeight / 2) / Math.tan(fov / 2);
 
   // Adjust for some padding (optional)
-  const padding = 2; // Adjust as needed
+  const padding = 10; // Adjust as needed
   const distance = requiredDistance + padding;
 
   // Set the camera position
